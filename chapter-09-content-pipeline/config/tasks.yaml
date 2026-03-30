@@ -1,0 +1,90 @@
+# config/tasks.yaml
+# Task-Definitionen für die 4-stufige Content-Pipeline.
+# Das "context"-Feld erzeugt die Abhängigkeitskette:
+# Analyst → Stratege → Texter → Reviewer
+
+kundenprofil_erstellen:
+  description: >
+    Analysiere das Profil des Kunden mit der ID {customer_id}.
+    Nutze das CRM-Tool, um folgende Informationen zu ermitteln:
+    - Name, Branche, Unternehmensgröße
+    - Aktuell genutzte Features und Nutzungsfrequenz
+    - Lifecycle-Phase (Onboarding / Aktiv / Risiko / etc.)
+    - Letzte Support-Kontakte oder offene Tickets
+    - Demografische Kommunikationspräferenzen (Kanal, Frequenz)
+
+    Liefere ein strukturiertes Profil zurück, das als Basis für
+    die Content-Entwicklung dient. Keine Spekulation – nur,
+    was die Daten zeigen.
+  expected_output: >
+    Ein JSON-Objekt mit den Feldern: customer_name, company,
+    industry, active_features, lifecycle_stage, risk_signals,
+    communication_preferences, recommended_tone.
+  agent: profil_analyst
+
+content_strategie_entwickeln:
+  description: >
+    Entwickle auf Basis des Kundenprofils eine konkrete Content-Strategie
+    für eine Trigger-E-Mail zum Anlass: {trigger_event}.
+
+    Definiere:
+    1. Kernbotschaft (max. 1 Satz): Was soll der Kunde verstehen?
+    2. Emotionaler Anker: Welches Bedürfnis oder Problem adressieren wir?
+    3. Beweisführung: Warum ist unser Angebot/Feature relevant für ihn?
+    4. Call-to-Action: Was soll er als nächstes tun?
+    5. Ton: Professionell/nüchtern, warm/persönlich, enthusiastisch?
+
+    Beziehe dich konkret auf die Daten aus dem Kundenprofil.
+  expected_output: >
+    Eine strukturierte Content-Strategie mit den fünf definierten
+    Komponenten. Klar und präzise, max. 300 Wörter.
+  agent: content_stratege
+  context:
+    - kundenprofil_erstellen
+
+e_mail_schreiben:
+  description: >
+    Schreibe die vollständige E-Mail auf Basis der Content-Strategie.
+
+    Bestandteile:
+    - Subject Line: 40-60 Zeichen, personalisiert, neugierig machend
+    - Preview Text: 80-100 Zeichen, ergänzt Subject Line
+    - Anrede: persönlich, mit Vornamen
+    - Body: Max. 3 kurze Absätze, kein Marketing-Bla-Bla
+    - CTA: Ein einziger, klarer Button-Text und URL-Platzhalter
+    - Signatur: Mit realem Ansprechpartner (Name aus CRM nutzen)
+
+    Die E-Mail soll sich wie eine persönliche Nachricht anfühlen,
+    nicht wie ein Newsletter.
+  expected_output: >
+    Die vollständige E-Mail mit allen Bestandteilen, formatiert
+    als JSON mit den Feldern: subject_line, preview_text,
+    salutation, body_paragraphs (Array), cta_text, cta_url_placeholder,
+    signature.
+  agent: content_writer
+  context:
+    - kundenprofil_erstellen
+    - content_strategie_entwickeln
+
+qualitaet_pruefen:
+  description: >
+    Prüfe die erstellte E-Mail gegen folgende Kriterien:
+
+    1. Personalisierung: Bezieht sich die E-Mail wirklich auf den
+       spezifischen Kunden und seinen Trigger-Anlass?
+    2. Konsistenz: Stimmt der Ton mit den Empfehlungen des Profil-Analysten?
+    3. Klarheit: Ist der CTA eindeutig und handlungsauslösend?
+    4. Länge: Ist die E-Mail zu lang? (Ziel: unter 150 Wörter im Body)
+    5. Compliance: Enthält die E-Mail keine unzulässigen Versprechen
+       oder irreführenden Aussagen?
+
+    Bei Mängeln: Benenne sie konkret und schlage Korrekturen vor.
+    Bei Freigabe: Bestätige die Freigabe explizit.
+  expected_output: >
+    Ein Review-Ergebnis mit: status (approved / needs_revision),
+    issues (Liste konkreter Mängel), suggestions (Verbesserungsvorschläge),
+    final_email (bei Freigabe: das finale E-Mail-Objekt).
+  agent: quality_reviewer
+  context:
+    - kundenprofil_erstellen
+    - e_mail_schreiben
