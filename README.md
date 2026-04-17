@@ -1,7 +1,7 @@
 # Agentic Marketing – Code-Beispiele
 
 Dieses Repository enthält die vollständigen, ausführbaren Code-Beispiele zum Buch
-**„Agentic Marketing: Wie Multi-Agenten-Systeme das Marketing neu erfinden"**
+**„Agentic Marketing – Die nächste Stufe der KI: Wie Multi-Agenten-Systeme das Marketing neu erfinden"**
 von Florian Stompe.
 
 ## Warum dieses Repository?
